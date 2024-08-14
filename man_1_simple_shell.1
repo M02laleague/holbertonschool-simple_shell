@@ -1,0 +1,110 @@
+.TH SIMPLE_SHELL 1 "August 2024" "1.0" "Simple shell manual"
+
+.SH NAME
+simple_shell \- A basic command-line interpreter inspired by early Unix shells.
+
+.SH SYNOPSI
+.B ./hsh
+.RI [commands]
+
+.SH DESCRIPTION
+The \fBhsh\fP program is a simple implementation of a command-line interpreter, inspired by the Thompson shell and other early Unix shells. This shell allows users to execute commands in both interactive and non-interactive modes.
+
+The shell reads commands entered by the user, executes them, and then waits for new commands. It also supports input/output redirection and command pipelines.
+
+.SH COMPILATION
+To compile the \fBhsh\fP shell, use the following command:
+.RS 4
+\fBgcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh\fP
+.RE
+This command ensures that the shell is compiled with strict error checking and follows the GNU89 standard.
+
+.SH USAGE
+.B interactive mode :
+.RS 4
+The shell starts in interactive mode when you run \fB./hsh\fP without any additional arguments or input redirection. The shell will display a prompt \fB"$ "\fP, wait for a user to enter a command, execute the command, and then display the prompt again. This cycle repeats until the user exits the shell using the \fBexit\fP command.
+
+Exemple:
+.RS 4
+\fB$ ./hsh\fP
+hsh main.c shell.c
+\fB($) exit\fP
+.RE
+.RE
+
+.B Non-interactive mode:
+.RS 4
+The shell can also operate in non-interactive mode, where it reads commands from a script or piped input and executes them without displaying a prompt.
+
+Exemple:
+.RS 4
+\fB$ echo "/bin/ls" | ./hsh\fP
+hsh main.c shell.c test_ls_2
+hsh main.c shell.c test_ls_2
+.RE
+.RE
+
+.SH BUILT-IN COMMANDS
+The following built-in commands are supported by \fBhsh\fP:
+
+.B cd
+Change the current working directory.
+
+.B exit
+Exite the shell.
+
+.B env
+Display the current environment variables.
+
+.B setenv
+Change or add an environment variable.
+
+.B unsetenv
+Remove an environment variable.
+
+.B help
+Display help information for built-in commands (if available).
+
+.SH ALLOWED FUNCTIONS AND SYSTEM CALLS
+The \fBhsh\fP shell is implemented using the following allowed functions and system calls:
+.RS 4
+\fBaccess(2), chdir(2), close(2), closedir(3), execve(2), exit(3), _exit(2), fflush(3), fork(2), free(3), getcwd(3), getline(3), getpid(2), isatty(3), kill(2), malloc(3), open(2), opendir(3), perror(3), printf(3), fprintf(3), vfprintf(3), sprintf(3), putchar(3), read(2), readdir(3), signal(2), stat(2), lstat(2), fstat(2), strtok(3), wait(2), waitpid(2), wait3(2), wait4(2), write(2)\fP.
+.RE
+
+.SH EXAMPLES
+.B interactive mode:
+.RS 4
+\fB$ ./hsh\fP
+.RS 4
+\fB($) cd /tmp\fP
+\fB($) /bin/ls\fP
+example.txt script.sh
+\fB($) exit\fP
+.RE
+.RE
+
+.B Non-interactive mode:
+.RS 4
+\fB$ echo "cd /tmp; /bin/ls" | ./hsh\fP
+example.txt script.sh
+.RE
+
+.B Using a script file:
+.RS 4
+\fB$ cat script.sh\fP
+\fBcd /tmp\fP
+\fB/bin/ls\fP
+\fB$ ./hsh < script.sh\fP
+example.txt script.sh
+.RE
+
+.SH SEE ALSO 
+.BR sh(1),
+.BR bash(1),
+.BR zsh(1),
+.BR execve(2),
+.BR fork(2),
+.BR wait(2).
+
+.SH AUTHOR
+This program was written by Salomon Diallo & Jean-Paul Dijeont.
