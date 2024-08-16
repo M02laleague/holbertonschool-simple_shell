@@ -15,6 +15,7 @@
 #define BUFFER_SIZE 1024
 #define TOKEN_DELIM " \t\r\n\a"
 #define PROMPT "#cisfun$ "
+#define SIZE_ARG 100
 
 /* Function prototypes */
 
