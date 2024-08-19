@@ -56,8 +56,9 @@ To run the shell in interactive mode, execute:
 - shell.c: Core functionalities of the shell.
 - shell.h: Header file containing function declarations.
 
-## Flowcharts 
-
+## Flowcharts
+- Shell 0.1
+https://photos.google.com/photo/AF1QipNXpSmzzqeIOU1WJYd10tqk5C2l0KnOTXv8oIim
 
 
 
