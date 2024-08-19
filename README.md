@@ -58,7 +58,7 @@ To run the shell in interactive mode, execute:
 
 ## Flowcharts
 - Shell 0.1
-https://photos.google.com/photo/AF1QipNXpSmzzqeIOU1WJYd10tqk5C2l0KnOTXv8oIim
+<img align="center" width="70%" src="https://lucid.app/lucidchart/1ca493ed-e908-45a8-8c63-5583c15481b6/edit?viewport_loc=1494%2C-3512%2C7021%2C3182%2C0_0&invitationId=inv_30d338fe-3d1c-4768-83de-e6f8b07949b1">
 
 
 
