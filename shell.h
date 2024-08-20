@@ -27,7 +27,7 @@ char *read_line(void);
 char **split_line(char *line);
 
 /* Command execution */
-int execute_command(char **args);
+void execute_command(char *cmd, char **argv);
 int launch_program(char **args);
 
 /* Builtin function declarations */
