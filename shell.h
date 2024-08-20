@@ -19,30 +19,12 @@
 
 /* Function prototypes */
 
-/* Main shell loop */
-void shell_loop(void);
+int get_input_and_prompt(char **buffer, size_t *len, char **argv);
+int handle_elements(char *buffer, char **env);
+char *find_command(char *cmd);
+int execute_command(char *cmd, char **argv);
 
-/* Input functions */
-char *read_line(void);
-char **split_line(char *line);
 
-/* Command execution */
-void execute_command(char *cmd, char **argv);
-int launch_program(char **args);
-
-/* Builtin function declarations */
-int shell_cd(char **args);
-int shell_help(char **args);
-int shell_exit(char **args);
-int shell_env(char **args);
-
-/* Helper functions */
-char *_getenv(const char *name);
-char *find_command(char *command);
-void free_args(char **args);
-
-/* Error handling */
-void print_error(char *msg);
 
 /* Environment variables */
 extern char **environ;
