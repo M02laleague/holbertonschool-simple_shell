@@ -98,7 +98,9 @@ char *find_command(char *cmd)
 	/*Parcour chaque repertoir dans 'PATH'*/
 	while (dir != NULL)
 	{
-		snprintf(full_path, sizeof(full_path), "%s/%s", dir, cmd);
+		strcpy(full_path, dir);	/* Copy directory path to full_path */
+		strcat(full_path, "/");	/* Append slash */
+		strcat(full_path, cmd);	/* Append command */
 		/*Verifie si le chemin complet est executable*/
 		if (stat(full_path, &st) == 0 && st.st_mode & S_IRUSR)
 		{
