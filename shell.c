@@ -48,7 +48,8 @@ int handle_elements(char *buffer, char **env)
 	{
 		while (*env)
 		{
-			printf("%s\n", *env);
+			write(STDOUT_FILENO, *env, strlen(*env));
+			write(STDOUT_FILENO, "\n", 1);
 			env++;
 		}
 		return (1);
@@ -58,7 +59,7 @@ int handle_elements(char *buffer, char **env)
 
 /**
  * find_command - Finds the full path of a command
- * @cmd: Command to find
+ * @command: Command to find
  * Return: Full path of the command if found, NULL otherwise
  */
 char *find_command(char *command)
@@ -135,67 +136,37 @@ void execute_command(char *cmd, char **argv)
  */
 int main(void)
 {
-    char *line = NULL;
-    size_t len = 0;
-    ssize_t read;
-    pid_t pid;
-    char *args[2];
-    int i;
+	char buffer[BUFFER_SIZE];
+	char *argv[SIZE_ARG];
+	char *cmd;
 
-    while (1)
-    {
-        printf("#cisfun$ ");
-        fflush(stdout);
+	while (1)
+	{
+		if (isatty(STDIN_FILENO))
+			write(STDOUT_FILENO, "#cisfun$ ", 9);
 
-        read = getline(&line, &len, stdin);
-        if (read == -1)
-        {
-            if (feof(stdin))
-            {
-                printf("\n");
-                break;
-            }
-            else
-            {
-                perror("./shell");
-                continue;
-            }
-        }
+		if (read_and_divid(buffer, argv) == -1)
+		{
+			if (feof(stdin))
+				break;
+			continue;
+		}
 
-        for (i = 0; line[i] != '\0'; i++)
-        {
-            if (line[i] == '\n')
-            {
-                line[i] = '\0';
-                break;
-            }
-        }
+		if (handle_elements(buffer, environ))
+			continue;
 
-        if (strlen(line) == 0)
-            continue;
+		cmd = find_command(argv[0]);
+		if (cmd != NULL)
+		{
+			execute_command(cmd, argv);
+			if (cmd != argv[0])
+				free(cmd);
+		}
+		else
+		{
+			write(STDERR_FILENO, "./shell: No such file or directory\n", 35);
+		}
+	}
 
-        pid = fork();
-        if (pid == -1)
-        {
-            perror("./shell");
-            continue;
-        }
-        if (pid == 0)
-        {
-            args[0] = line;
-            args[1] = NULL;
-            if (execve(line, args, environ) == -1)
-            {
-                fprintf(stderr, "./shell: No such file or directory\n");
-                exit(EXIT_FAILURE);
-            }
-        }
-        else
-        {
-            wait(NULL);
-        }
-    }
-
-    free(line);
-    return (0);
+	return (0);
 }
