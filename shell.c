@@ -61,30 +61,41 @@ int handle_elements(char *buffer, char **env)
  * @cmd: Command to find
  * Return: Full path of the command if found, NULL otherwise
  */
-char *find_command(char *cmd)
+char *find_command(char *command)
 {
-	struct stat st;
-	char *path, *path_cpy, *dir;
-	static char full_path[BUFFER_SIZE];
-
-	if (stat(cmd, &st) == 0 && st.st_mode & S_IXUSR)
-		return (cmd);
+	char *path, *path_copy, *path_token, *file_path;
+	int command_length, directory_length;
+	struct stat buffer;
 
 	path = getenv("PATH");
-	path_cpy = strdup(path);
-	dir = strtok(path_cpy, ":");
-
-	while (dir != NULL)
+	if (path)
 	{
-		sprintf(full_path, "%s/%s", dir, cmd);
-		if (stat(full_path, &st) == 0 && st.st_mode & S_IXUSR)
+		path_copy = strdup(path);
+		command_length = strlen(command);
+		path_token = strtok(path_copy, ":");
+		while (path_token != NULL)
 		{
-			free(path_cpy);
-			return (full_path);
+			directory_length = strlen(path_token);
+			file_path = malloc(command_length + directory_length + 2);
+			strcpy(file_path, path_token);
+			strcat(file_path, "/");
+			strcat(file_path, command);
+			if (stat(file_path, &buffer) == 0)
+			{
+				free(path_copy);
+				return (file_path);
+			}
+			else
+			{
+				free(file_path);
+				path_token = strtok(NULL, ":");
+			}
 		}
-		dir = strtok(NULL, ":");
+		free(path_copy);
+		if (stat(command, &buffer) == 0)
+			return (command);
+		return (NULL);
 	}
-	free(path_cpy);
 	return (NULL);
 }
 
@@ -124,61 +135,59 @@ void execute_command(char *cmd, char **argv)
  */
 int main(void)
 {
-    char *line = NULL;
-    size_t len = 0;
-    ssize_t read;
-    pid_t pid;
+	char *line = NULL;
+	size_t len = 0;
+	ssize_t read;
+	char *args[2];
+	char *command_path;
+	pid_t pid;
 
-    while (1)
-    {
-        if (isatty(STDIN_FILENO))
-            printf("#cisfun$ ");
-        fflush(stdout);
+	while (1)
+	{
+		printf("#cisfun$ ");
+		fflush(stdout);
 
-        read = getline(&line, &len, stdin);
-        if (read == -1)
-        {
-            if (feof(stdin))
-            {
-                printf("\n");
-                break;
-            }
-            else
-            {
-                perror("getline");
-                continue;
-            }
-        }
+		read = getline(&line, &len, stdin);
+		if (read == -1)
+		{
+			printf("\n");
+			break;
+		}
 
-        line[strcspn(line, "\n")] = '\0';
+		line[strcspn(line, "\n")] = '\0';
 
-        if (strlen(line) == 0)
-            continue;
+		if (strlen(line) == 0)
+			continue;
 
-        pid = fork();
-        if (pid == -1)
-        {
-            perror("fork");
-            continue;
-        }
-        if (pid == 0)
-        {
-            char *args[2];
-            args[0] = line;
-            args[1] = NULL;
+		command_path = find_command(line);
+		if (command_path == NULL)
+		{
+			fprintf(stderr, "./shell: No such file or directory\n");
+			continue;
+		}
 
-            if (execve(line, args, environ) == -1)
-            {
-                fprintf(stderr, "./shell: No such file or directory\n");
-                _exit(EXIT_FAILURE);
-            }
-        }
-        else
-        {
-            wait(NULL);
-        }
-    }
+		pid = fork();
+		if (pid == -1)
+		{
+			perror("fork");
+			continue;
+		}
+		if (pid == 0)
+		{
+			args[0] = command_path;
+			args[1] = NULL;
+			if (execve(command_path, args, environ) == -1)
+			{
+				perror("./shell");
+				exit(EXIT_FAILURE);
+			}
+		}
+		else
+		{
+			wait(NULL);
+		}
+	}
 
-    free(line);
-    return (0);
+	free(line);
+	return (0);
 }
