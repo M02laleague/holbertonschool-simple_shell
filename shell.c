@@ -25,7 +25,15 @@ int get_input_and_prompt(char **buffer, size_t *len, char **argv)
 	/*Lire l'entré de l'utilisateur*/
 	b_read = getline(buffer, len, stdin);
 	if (b_read == -1)/*verifie si il y a une erreur de lecture */
-		return (-1);
+	{
+		if (feof(stdin))
+			return (-1);
+		else if (errno)
+		{
+			perror("getline");
+			return (-1);
+		}
+	}
 
 	(*buffer)[b_read - 1] = '\0';	/*Retirer le retour a la ligne*/
 
@@ -74,7 +82,7 @@ int handle_elements(char *buffer, char **env)
  */
 char *find_command(char *cmd)
 {
-	struct stat st;/*structure pour verifier les information*/
+	struct stat st;
 	char *path = getenv("PATH");/*recurepere la variable 'PATH'*/
 	char *path_cpy = strdup(path);/*creé une copie de 'PATH' pour strtok*/
 	char *dir = strtok(path_cpy, ":");/*divise 'PATH' en repertoire*/
@@ -90,10 +98,7 @@ char *find_command(char *cmd)
 	/*Parcour chaque repertoir dans 'PATH'*/
 	while (dir != NULL)
 	{
-		strcpy(full_path, dir);/*copie le repertoir dans full_path*/
-		strcat(full_path, "/");/*Ajout un slash a la fin du repertoir*/
-		strcat(full_path, cmd);/*Ajout la commande apres slash*/
-
+		snprintf(full_path, sizeof(full_path), "%s/%s", dir, cmd);
 		/*Verifie si le chemin complet est executable*/
 		if (stat(full_path, &st) == 0 && st.st_mode & S_IRUSR)
 		{
@@ -180,4 +185,3 @@ int	main(void)
 	free(buffer); /*libere la memoire alouer par getline*/
 	return (0);	/*  le programe termine avec succes */
 }
-
