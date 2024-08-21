@@ -124,38 +124,61 @@ void execute_command(char *cmd, char **argv)
  */
 int main(void)
 {
-	char buffer[BUFFER_SIZE];
-	char *argv[SIZE_ARG];
-	char *cmd;
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    pid_t pid;
 
-	while (1)
-	{
-		if (isatty(STDIN_FILENO))
-			printf("#cisfun$ ");
-		fflush(stdout);
+    while (1)
+    {
+        if (isatty(STDIN_FILENO))
+            printf("#cisfun$ ");
+        fflush(stdout);
 
-		if (read_and_divid(buffer, argv) == -1)
-		{
-			if (!isatty(STDIN_FILENO))
-				break;
-			continue;
-		}
+        read = getline(&line, &len, stdin);
+        if (read == -1)
+        {
+            if (feof(stdin))
+            {
+                printf("\n");
+                break;
+            }
+            else
+            {
+                perror("getline");
+                continue;
+            }
+        }
 
-		if (handle_elements(buffer, environ))
-			break;
+        line[strcspn(line, "\n")] = '\0';
 
-		cmd = argv[0];
-		if (cmd[0] != '/' && cmd[0] != '.')
-			cmd = find_command(cmd);
+        if (strlen(line) == 0)
+            continue;
 
-		if (cmd != NULL)
-		{
-			execute_command(cmd, argv);
-		}
-		else
-		{
-			fprintf(stderr, "./shell: No such file or directory\n");
-		}
-	}
-	return (0);
+        pid = fork();
+        if (pid == -1)
+        {
+            perror("fork");
+            continue;
+        }
+        if (pid == 0)
+        {
+            char *args[2];
+            args[0] = line;
+            args[1] = NULL;
+
+            if (execve(line, args, environ) == -1)
+            {
+                fprintf(stderr, "./shell: No such file or directory\n");
+                _exit(EXIT_FAILURE);
+            }
+        }
+        else
+        {
+            wait(NULL);
+        }
+    }
+
+    free(line);
+    return (0);
 }
