@@ -160,7 +160,7 @@ int	main(void)
 		/*  Lire la commande entree et afichier le prompt*/
 		if (get_input_and_prompt(&buffer, &len, argv) == -1)
 		{
-			if (!isatty(STDIN_FILENO))/*si EOF est atteint mode non interactif*/
+			if (!isatty(STDIN_FILENO) || feof(stdin))
 				break;
 			continue;
 		}
