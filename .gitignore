@@ -1,2 +1,7 @@
-1.c
 test
+shell_1.c
+shell_1.h
+handle_elements.c
+execute_command.c
+find_command.c
+get_input_and_prompt.c
