@@ -53,7 +53,7 @@ By the end of this project, you should be able to:
 - strcpy
 - strcat
 - stat
- -malloc
+- malloc
 - free
 - fork
 - execve
@@ -71,7 +71,7 @@ By the end of this project, you should be able to:
   Returns: 0 on success, -1 on failure.
   Description: This function reads input from the user, handles errors, and tokenizes the input string into separate command arguments.
 
-3. handle_elements
+2. handle_elements
 
   Purpose: Manages built-in commands.
   Parameters:
@@ -80,14 +80,15 @@ By the end of this project, you should be able to:
   Returns: 1 if a built-in command was executed, 0 otherwise.
   Description: This function checks for built-in commands such as "exit" and "env". It executes the appropriate action based on the command.
 
-4. find_command
+3. find_command
 
   Purpose: Finds the full path of a command.
   Parameters:
   command: The command to find.
   Returns: The full path of the command if found, NULL otherwise.
   Description: This function searches the system's PATH for the specified command and returns its full path if it exists.
-6. execute_command
+
+4.execute_command
 
   Purpose: Executes a command.
   Parameters:
