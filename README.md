@@ -58,12 +58,8 @@ To run the shell in interactive mode, execute:
 ## Flowcharts
 ![Blank diagram](https://github.com/user-attachments/assets/d709d3ab-eac8-4d92-98ad-1110d74841bf)
 
-
-
-
-
-
 ## Testing
+![Capture d’écran 2024-08-22 191218](https://github.com/user-attachments/assets/43eb95ce-df45-4a6f-ac03-03e634cecb28)
 
 ## License
 
