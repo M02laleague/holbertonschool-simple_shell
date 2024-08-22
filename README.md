@@ -34,7 +34,7 @@ By the end of this project, you should be able to:
 - Ensure no memory leaks occur in the implementation.
 - Each header file must be include guarded.
 - Use system calls only when necessary.
-- 
+  
   List of the used functions:
 - read_and_divid
 - handle_elements
@@ -59,6 +59,41 @@ By the end of this project, you should be able to:
 - execve
 - exit
 - wait
+  
+## Functions Overview
+
+1. read_and_divid
+
+  Purpose: Reads user input and splits it into tokens.
+  Parameters:
+  buffer: A buffer to store the command input.
+  argv: An array to store the command arguments.
+  Returns: 0 on success, -1 on failure.
+  Description: This function reads input from the user, handles errors, and tokenizes the input string into separate command arguments.
+
+3. handle_elements
+
+  Purpose: Manages built-in commands.
+  Parameters:
+  buffer: The input command.
+  env: The environment variables.
+  Returns: 1 if a built-in command was executed, 0 otherwise.
+  Description: This function checks for built-in commands such as "exit" and "env". It executes the appropriate action based on the command.
+
+4. find_command
+
+  Purpose: Finds the full path of a command.
+  Parameters:
+  command: The command to find.
+  Returns: The full path of the command if found, NULL otherwise.
+  Description: This function searches the system's PATH for the specified command and returns its full path if it exists.
+6. execute_command
+
+  Purpose: Executes a command.
+  Parameters:
+  cmd: The command to execute.
+  argv: The command arguments.
+  Description: This function forks a new process and uses execve to execute the command in the child process. It handles errors during the forking and execution
 
 ## Usage
 
