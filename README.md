@@ -52,13 +52,12 @@ To run the shell in interactive mode, execute:
 - README.md: Project description and instructions.
 - AUTHORS: List of contributors.
 - man_1_simple_shell: Manual page for the shell.
-- main.c: Entry point of the shell program.
 - shell.c: Core functionalities of the shell.
 - shell.h: Header file containing function declarations.
 
 ## Flowcharts
 - Shell 0.1
-<img align="center" width="70%" src="https://lucid.app/lucidchart/1ca493ed-e908-45a8-8c63-5583c15481b6/edit?viewport_loc=1494%2C-3512%2C7021%2C3182%2C0_0&invitationId=inv_30d338fe-3d1c-4768-83de-e6f8b07949b1">
+<img align="center" width="70%" src="https://lucid.app/lucidchart/896860b7-c0c1-4bcb-865b-52e250eb8e8b/view">
 
 
 
@@ -68,6 +67,7 @@ To run the shell in interactive mode, execute:
 
 
 
+## Testing
 
 ## License
 
