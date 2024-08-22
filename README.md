@@ -56,12 +56,7 @@ To run the shell in interactive mode, execute:
 - shell.h: Header file containing function declarations.
 
 ## Flowcharts
-- Shell 0.1
-<img align="center" width="70%" src="[https://lucid.app/lucidchart/896860b7-c0c1-4bcb-865b-52e250eb8e8b/view](https://lucid.app/lucidchart/896860b7-c0c1-4bcb-865b-52e250eb8e8b/edit?viewport_loc=-6184%2C-4711%2C14669%2C7583%2C0_0&invitationId=inv_ff8da1bb-0945-4ba6-9917-886b77b3eaf7)">
-
-![Simple Shale (1)](https://github.com/user-attachments/assets/de62d7c4-6603-4988-bfdf-a4f10630dc76)
-
-
+![Blank diagram](https://github.com/user-attachments/assets/d709d3ab-eac8-4d92-98ad-1110d74841bf)
 
 
 
