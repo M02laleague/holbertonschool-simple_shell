@@ -1,200 +1,184 @@
 #include "shell.h"
-
 /**
- * get_input_and_prompt - Reads user input and displays the prompt
- * @buffer: Pointer to buffer to store the command
- * @len: Pointer to the length of the buffer
+ * read_and_divid - Reads user input and splits it into tokens
+ * @buffer: Buffer to store the command
  * @argv: Array to store command arguments
- *
  * Return: 0 on success, -1 on failure
  */
-
-int get_input_and_prompt(char **buffer, size_t *len, char **argv)
+int read_and_divid(char *buffer, char **argv)
 {
-	ssize_t b_read;/* stock le nombre d'octets lus par read()*/
-	char *prompt = "$ ";/* Prompt affiche pour l'utilisateur*/
-	int i = 0;	/*index pour parcourir le tableau argv*/
-	char *token;	/*pointeur pour stoker chaque argument*/
+	ssize_t b_read;
+	int i = 0;
+	char *token;
 
-	/*(mode interactif) si l'entre standard est un terminal affiche le prompt*/
-	if (isatty(STDIN_FILENO))
+	b_read = read(STDIN_FILENO, buffer, BUFFER_SIZE);
+	if (b_read == -1)
 	{
-		printf("%s", prompt);/* affiche le prompt */
-		/* vide le buffer pour que le prompt s'afficher immediatement */
-		fflush(stdout);
+		perror("read");
+		return (-1);
 	}
-	/*Lire l'entré de l'utilisateur*/
-	b_read = getline(buffer, len, stdin);
-	if (b_read == -1) /* Vérifie si getline retourne une erreur ou un EOF */
+	if (b_read == 0)
 	{
 		if (isatty(STDIN_FILENO))
-		{
-			printf("\n"); /* Pour ne pas laisser le prompt sur la même ligne */
-		}
-		return (-1); /* Retourne -1 pour quitter la boucle principale */
+			write(STDOUT_FILENO, "\n", 1);
+		return (-1);
 	}
+	buffer[b_read - 1] = '\0';
 
-	(*buffer)[b_read - 1] = '\0';	/*Retirer le retour a la ligne*/
-
-	/*  Divise la commande en argument (tokens) en utilisant strok */
-		token = strtok(*buffer, " ");	/*  Separe la commande par les espaces */
-	/*  continue tant qu'il reste des tokens */
-		while (token != NULL && i < SIZE_ARG - 1)
-		{
-			argv[i++] = token;	/*  stock chaque argument dans argv */
-			token = strtok(NULL, " ");	/* passe au token suivant */
-		}
-		argv[i] = NULL;	/*  Terminer la liste des arguments par NULL pour execve*/
-		return (0);
+	token = strtok(buffer, " ");
+	while (token != NULL && i < SIZE_ARG - 1)
+	{
+		argv[i++] = token;
+		token = strtok(NULL, " ");
+	}
+	argv[i] = NULL;
+	return (0);
 }
 
 /**
- * handle_elements - Handles built-in commands like "exit" and "env"
+ * handle_elements - Handles built-in commands
  * @buffer: Input command
  * @env: Environment variables
- *
  * Return: 1 if a built-in command was executed, 0 otherwise
  */
 int handle_elements(char *buffer, char **env)
 {
-	/*verifie si l'utilisateur a tapé "exit" pour quitter le shell*/
-		if (strcmp(buffer, "exit") == 0)
-		{
-			return (1);	/*sort de la boucle est termine le prog*/
-		}
-	/*si l'itulisateur a tapé "env" pour afficher les variable d'environement*/
-		if (strcmp(buffer, "env") == 0)
-		{
-			while (*env)/*parcours toute les variable d'envronement */
-			{
-				printf("%s\n", *env);
-				env++;/*passe a la varible suivante*/
-			}
-			return (1);/*sort de la boucle est termine le prog*/
-		}
-		return (0);/*si aucune commande intern est detecté*/
-}
-/**
- * find_command - Checks if a command is executable or finds it in the 'PATH'
- * @cmd: Command to be checked or found
- *
- * Return: The full path of the command if found, or NULL if not found
- */
-char *find_command(char *cmd)
-{
-	struct stat st;
-	char *path, *path_cpy, *dir = NULL;
-	char **env = environ;
-	char *path_prefix = "PATH=";
-	static char full_path[BUFFER_SIZE];/*buffer pour stoket le chemin complet*/
-	size_t prefix_len = strlen(path_prefix);
+	if (strcmp(buffer, "exit") == 0)
+		return (2);
 
-	while (*env != NULL)
+	if (strcmp(buffer, "env") == 0)
 	{
-		if (strncmp(*env, path_prefix, prefix_len) == 0)
+		while (*env)
 		{
-			path = *env + prefix_len;
+			write(STDOUT_FILENO, *env, strlen(*env));
+			write(STDOUT_FILENO, "\n", 1);
+			env++;
+		}
+		return (1);
+	}
+	return (0);
+}
+
+/**
+ * find_command - Finds the full path of a command
+ * @command: Command to find
+ * Return: Full path of the command if found, NULL otherwise
+ */
+
+char *find_command(char *command)
+{
+	char *path = NULL, *path_copy, *path_token, *file_path;
+	int command_length, directory_length, i;
+	struct stat buffer;
+
+	for (i = 0; environ[i]; i++)
+	{
+		if (strncmp(environ[i], "PATH=", 5) == 0)
+		{ path = environ[i] + 5;
 			break;
 		}
-		env++;
 	}
-	if (!path)
-		return (NULL);
-
-	path_cpy = strdup(path);
-	dir = strtok(path_cpy, ":");
-	/*verifie si la command est un chemin absolue ou relatif*/
-	if (stat(cmd, &st) == 0 && st.st_mode & S_IXUSR)
-		return (cmd);/*return la commande si elle est executable*/
-
-	while (dir != NULL)
+	if (path)
 	{
-		strncpy(full_path, dir, BUFFER_SIZE - 1);
-		full_path[BUFFER_SIZE - 1] = '\0';
-		strncat(full_path, "/", BUFFER_SIZE - strlen(full_path) - 1);
-		strncat(full_path, cmd, BUFFER_SIZE - strlen(full_path) - 1);
-		if (stat(full_path, &st) == 0 && st.st_mode & S_IRUSR)
+		path_copy = strdup(path);
+		command_length = strlen(command);
+		path_token = strtok(path_copy, ":");
+		while (path_token != NULL)
 		{
-			free(path_cpy);/*libere la memoire utiliser pour la copie de 'PATH'*/
-			return (full_path);/*Return le chemin complet de la commande*/
-		}
-		dir = strtok(NULL, ":");/*passe au repertoir suivant*/
-	}
-	free(path_cpy);/*Libere la memoire utiliser pour la copie*/
-	return (NULL);/*NULL si la commande n'a pas ete trouver*/
-}
-
-/**
- * execute_command - Executes a command by forking a child process
- * @cmd: Command to be executed
- * @argv: Array of command arguments
- *
- * Return: 0 on success, -1 on failure
- */
-int execute_command(char *cmd, char **argv)
-{
-		int stat;/*variable pour stocker le status du processus enfant*/
-		pid_t pid = fork();/*Cree un processur enfant pour executer la commande*/
-
-		if (pid == -1)/*  si la creation du processur echoue*/
-		{
-			perror("fork");/*Affiche un message d'erreur si fork echoue*/
-			return (-1);
-		}
-		if (pid == 0)/*  processus enfan */
-		{
-			/*Remplace le processur enfant par la commande specifié*/
-			if (execve(cmd, argv, environ) == -1)
+			directory_length = strlen(path_token);
+			file_path = malloc(command_length + directory_length + 2);
+			strcpy(file_path, path_token);
+			strcat(file_path, "/");
+			strcat(file_path, command);
+			if (stat(file_path, &buffer) == 0)
 			{
-				perror("./shell");/*Affiche un message d'erreur si execve echoue*/
-				exit(EXIT_FAILURE);	/* Si execve echoue, termine le processus enfant */
+				free(path_copy);
+				return (file_path);
+			}
+			else
+			{
+				free(file_path);
+				path_token = strtok(NULL, ":");
 			}
 		}
-		else	/*Processus parent */
-		{
-			wait(&stat);	/*  Atend que le processus enfant se termine */
-		}
-		return (0);
+		free(path_copy);
+		if (stat(command, &buffer) == 0)
+			return (command);
+		return (NULL);
+	}
+	return (NULL);
 }
 /**
+ * execute_command - Executes a command
+ * @cmd: Command to execute
+ * @argv: Command arguments
+ */
+void execute_command(char *cmd, char **argv)
+{
+	pid_t pid;
+	int status;
+
+	pid = fork();
+	if (pid == -1)
+	{
+		perror("fork");
+		return;
+	}
+	if (pid == 0)
+	{
+		if (execve(cmd, argv, environ) == -1)
+		{
+			perror("./shell");
+			exit(EXIT_FAILURE);
+		}
+	}
+	else
+	{
+		wait(&status);
+	}
+}
+
+/**
  * main - Entry point of the shell
- *
  * Return: Always 0
  */
 int main(void)
 {
-	char *buffer = NULL;	/* stock la commande lue */
-	char *cmd; /* Pointeur pour stocker le chemin de la commande */
-	char *argv[SIZE_ARG]; /* Tableau pour stoker les arguments de la commande */
-	size_t len = 0;
+	char buffer[BUFFER_SIZE], *argv[SIZE_ARG], *cmd, *temp;
+	int should_exit = 0, result;
 
-	while (1) /* boucle infinie pour maintenir le shell actif */
+	while (!should_exit)
 	{
-		/* Lire la commande entrée et afficher le prompt */
-		if (get_input_and_prompt(&buffer, &len, argv) == -1)
-		{
-			break;
-		}
+		if (isatty(STDIN_FILENO))
+			write(STDOUT_FILENO, "#cisfun$ ", 9);
 
-		/* Gérer les commandes intégrées */
-		if (handle_elements(buffer, environ))
-		{
+		if (read_and_divid(buffer, argv) == -1)
 			break;
-		}
 
-		cmd = find_command(argv[0]); /* Le premier argument est une commande */
-		/* Si la commande n'est pas un chemin absolu, la chercher dans le 'PATH' */
+		if (!argv[0])
+			continue;
+
+		result = handle_elements(argv[0], environ);
+		if (result == 2)
+		{
+			should_exit = 1;
+			continue;
+		}
+		else if (result == 1)
+			continue;
+
+		cmd = find_command(argv[0]);
 		if (cmd)
-			execute_command(cmd, argv);
-		else
 		{
-			printf("%s: 1: %s: command not found\n", argv[0], buffer);
+			temp = argv[0];
+			argv[0] = cmd;
+			execute_command(cmd, argv);
+			if (cmd != temp)
+				free(cmd);
+			argv[0] = temp;
 		}
-
-		if (!isatty(STDIN_FILENO))/*Sortir après exécution en mode non interactif*/
-			break;
+		else
+			write(STDERR_FILENO, "./shell: No such file or directory\n", 35);
 	}
-
-	free(buffer);	/* Libérer la mémoire allouée par getline */
-	return (0);	/* Le programme termine avec succès */
+	return (0);
 }
