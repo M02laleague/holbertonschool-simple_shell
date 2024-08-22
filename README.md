@@ -28,18 +28,48 @@ By the end of this project, you should be able to:
 ## Requirements
 
 - Allowed editors: `vi`, `vim`, `emacs`.
-- All files will be compiled on Ubuntu 20.04 LTS using `gcc`.
+- All files will be compiled on Ubuntu 20.04 LTS using `gcc -Wall -Werror -Wextra -pedantic -std=gnu89 shell.c -o hsh`.
 
 - Code must adhere to the Betty style guidelines.
 - Ensure no memory leaks occur in the implementation.
 - Each header file must be include guarded.
 - Use system calls only when necessary.
+- 
+  List of the used functions:
+- read_and_divid
+- handle_elements
+- find_command
+- execute_command
+- main
+- read (fonction système)
+- perror
+- isatty
+- write
+- strtok
+- strcmp
+- strlen
+- strncmp
+- strdup
+- strcpy
+- strcat
+- stat
+ -malloc
+- free
+- fork
+- execve
+- exit
+- wait
 
 ## Usage
 
 To run the shell in interactive mode, execute:
 ```bash
 ./hsh
+```
+To run the manual page:
+
+```bash
+man ./man_1_simple_shell.1
 ```
 
 ## Built-in Commands
