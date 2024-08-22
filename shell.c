@@ -19,6 +19,8 @@ int read_and_divid(char *buffer, char **argv)
 	}
 	if (b_read == 0)
 	{
+		if (isatty(STDIN_FILENO))
+			write(STDOUT_FILENO, "\n", 1);
 		return (-1);
 	}
 	buffer[b_read - 1] = '\0';
@@ -42,7 +44,7 @@ int read_and_divid(char *buffer, char **argv)
 int handle_elements(char *buffer, char **env)
 {
 	if (strcmp(buffer, "exit") == 0)
-		return (1);
+		return (2);
 
 	if (strcmp(buffer, "env") == 0)
 	{
@@ -62,13 +64,20 @@ int handle_elements(char *buffer, char **env)
  * @command: Command to find
  * Return: Full path of the command if found, NULL otherwise
  */
+
 char *find_command(char *command)
 {
-	char *path, *path_copy, *path_token, *file_path;
-	int command_length, directory_length;
+	char *path = NULL, *path_copy, *path_token, *file_path;
+	int command_length, directory_length, i;
 	struct stat buffer;
 
-	path = getenv("PATH");
+	for (i = 0; environ[i]; i++)
+	{
+		if (strncmp(environ[i], "PATH=", 5) == 0)
+		{ path = environ[i] + 5;
+			break;
+		}
+	}
 	if (path)
 	{
 		path_copy = strdup(path);
@@ -99,7 +108,6 @@ char *find_command(char *command)
 	}
 	return (NULL);
 }
-
 /**
  * execute_command - Executes a command
  * @cmd: Command to execute
@@ -136,37 +144,41 @@ void execute_command(char *cmd, char **argv)
  */
 int main(void)
 {
-	char buffer[BUFFER_SIZE];
-	char *argv[SIZE_ARG];
-	char *cmd;
+	char buffer[BUFFER_SIZE], *argv[SIZE_ARG], *cmd, *temp;
+	int should_exit = 0, result;
 
-	while (1)
+	while (!should_exit)
 	{
 		if (isatty(STDIN_FILENO))
 			write(STDOUT_FILENO, "#cisfun$ ", 9);
 
 		if (read_and_divid(buffer, argv) == -1)
+			break;
+
+		if (!argv[0])
+			continue;
+
+		result = handle_elements(argv[0], environ);
+		if (result == 2)
 		{
-			if (feof(stdin))
-				break;
+			should_exit = 1;
 			continue;
 		}
-
-		if (handle_elements(buffer, environ))
+		else if (result == 1)
 			continue;
 
 		cmd = find_command(argv[0]);
-		if (cmd != NULL)
+		if (cmd)
 		{
+			temp = argv[0];
+			argv[0] = cmd;
 			execute_command(cmd, argv);
-			if (cmd != argv[0])
+			if (cmd != temp)
 				free(cmd);
+			argv[0] = temp;
 		}
 		else
-		{
 			write(STDERR_FILENO, "./shell: No such file or directory\n", 35);
-		}
 	}
-
 	return (0);
 }
