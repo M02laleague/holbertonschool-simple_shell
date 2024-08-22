@@ -17,6 +17,6 @@ extern char **environ;
 int read_and_divid(char *buffer, char **argv);
 int handle_elements(char *buffer, char **env);
 char *find_command(char *cmd);
-int execute_command(char *cmd, char **argv);
+void execute_command(char *cmd, char **argv);
 
 #endif /* SHELL_H */
