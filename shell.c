@@ -79,8 +79,10 @@ char *find_command(char *command)
 	for (i = 0; environ[i]; i++)/*Search for PATH environnement variable*/
 	{
 		if (strncmp(environ[i], "PATH=", 5) == 0)
+		{
 			path = environ[i] + 5;/* extract PATH value*/
 			break;
+		}
 	}
 	if (path)
 	{
@@ -88,8 +90,7 @@ char *find_command(char *command)
 		command_length = strlen(command);/*get length of command*/
 		path_token = strtok(path_copy, ":");/*tokenize PATH */
 		while (path_token != NULL)
-		{
-			directory_length = strlen(path_token);/*get length of current directory*/
+		{directory_length = strlen(path_token);/*get length of current directory*/
 			file_path = malloc(command_length + directory_length + 2);
 			strcpy(file_path, path_token);/*copy directory path*/
 			strcat(file_path, "/");/*Add slash*/
