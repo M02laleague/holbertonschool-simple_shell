@@ -1,16 +1,27 @@
 .TH SIMPLE_SHELL 1 "August 2024" "1.0" "Simple shell manual"
 
 .SH NAME
-simple_shell \- A basic command-line interpreter inspired by early Unix shells.
+SIMPLE SHELL \- Simple shell program, inspired by early Unix shells.
 
 .SH SYNOPSI
 .B ./hsh
 .RI [commands]
 
 .SH DESCRIPTION
-The \fBhsh\fP program is a simple implementation of a command-line interpreter, inspired by the Thompson shell and other early Unix shells. This shell allows users to execute commands in both interactive and non-interactive modes.
+The \fBhsh\fP program is a simple shell program that reads user commands from standard input and executes them.
 
-The shell reads commands entered by the user, executes them, and then waits for new commands. It also supports input/output redirection and command pipelines.
+The shell runs in two modes: interactive and non-interactive. In interactive mode, the shell displays a prompt and waits for user input. In non-interactive mode, the shell reads commands from a script or piped input.
+
+.SH INTERNAL COMMANDS
+The following internal commands are supported:
+
+.TP
+.B exit
+Exit the shell.
+
+.TP
+.B env
+Display the current environment variables.
 
 .SH COMPILATION
 To compile the \fBhsh\fP shell, use the following command:
@@ -27,15 +38,15 @@ The shell starts in interactive mode when you run \fB./hsh\fP without any additi
 Exemple:
 .RS 4
 \fB$ ./hsh\fP
-hsh main.c shell.c
+\fB($) ls\fP
+main.c shell.c
 \fB($) exit\fP
 .RE
 .RE
 
 .B Non-interactive mode:
 .RS 4
-The shell can also operate in non-interactive mode, where it reads commands from a script or piped input and executes them without displaying a prompt.
-
+In non-interactive mode, the shell reads commands from a script or piped input and executes them without displaying a prompt. This mode is useful for running batch scripts or processing commands from another program.
 Exemple:
 .RS 4
 \fB$ echo "/bin/ls" | ./hsh\fP
@@ -47,23 +58,19 @@ hsh main.c shell.c test_ls_2
 .SH BUILT-IN COMMANDS
 The following built-in commands are supported by \fBhsh\fP:
 
-.B cd
-Change the current working directory.
-
 .B exit
 Exite the shell.
 
 .B env
 Display the current environment variables.
 
-.B setenv
-Change or add an environment variable.
+.SH EXTERNAL COMMANDS
+The shell supports executing external commands by searching for the command in the directories specified by the \fBPATH\fP environment variable. It uses the \fBexecve\fP system call to execute the command.
 
-.B unsetenv
-Remove an environment variable.
+If the command is not found, the shell prints an error message and returns a status of 127.
 
-.B help
-Display help information for built-in commands (if available).
+.SH EXIT STATUS
+The shell returns the exit status of the last executed command. If a command is not found, the shell returns an exit status of 127. If an internal command is executed successfully, the shell returns 0.
 
 .SH ALLOWED FUNCTIONS AND SYSTEM CALLS
 The \fBhsh\fP shell is implemented using the following allowed functions and system calls:
@@ -72,11 +79,11 @@ The \fBhsh\fP shell is implemented using the following allowed functions and sys
 .RE
 
 .SH EXAMPLES
+
 .B interactive mode:
 .RS 4
 \fB$ ./hsh\fP
 .RS 4
-\fB($) cd /tmp\fP
 \fB($) /bin/ls\fP
 example.txt script.sh
 \fB($) exit\fP
@@ -85,14 +92,14 @@ example.txt script.sh
 
 .B Non-interactive mode:
 .RS 4
-\fB$ echo "cd /tmp; /bin/ls" | ./hsh\fP
+\fB$ echo "/bin/ls" | ./hsh\fP
 example.txt script.sh
 .RE
 
 .B Using a script file:
 .RS 4
 \fB$ cat script.sh\fP
-\fBcd /tmp\fP
+\fB/bin/ls\fP
 \fB/bin/ls\fP
 \fB$ ./hsh < script.sh\fP
 example.txt script.sh
